@@ -205,6 +205,17 @@ impl<T> DoublyLinkedList<T> {
         self.left.get_top()
     }
 
+    pub fn edit_current(&mut self, value: T) {
+        self.left.pop();
+        self.left.push(value);
+    }
+
+    pub fn edit(&mut self, index: i32, value: T) {
+        self.shift(index);
+        self.left.pop();
+        self.left.push(value);
+    }
+
 }
 
 pub fn print_dll(dl: &mut DoublyLinkedList<i32>) {
@@ -249,8 +260,8 @@ fn main() {
     dl.previous();
     dl.previous();
     dl.next();
-    print!("{} ", dl.get_current().unwrap());
-
+    dl.edit(1, 22);
+    print_dll(&mut dl);
 
 
 
