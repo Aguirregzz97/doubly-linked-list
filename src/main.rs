@@ -180,8 +180,24 @@ impl<T> DoublyLinkedList<T> {
         self.size += 1;
     }
 
+    pub fn pop_back(&mut self) {
+        self.shift(*self.get_size().unwrap() - 1);
+        self.left.pop();
+        self.size = cmp::max(0, self.size - 1);
+    }
+
+    pub fn pop(&mut self, index: i32) {
+        self.shift(index);
+        self.left.pop();
+        self.size = cmp::max(0, self.size - 1);
+    }
+
     pub fn get_size(&self) -> Option<&i32> {
         Some(&self.size)
+    }
+
+    pub fn get_current(&mut self) -> Option<&T> {
+        self.left.get_top()
     }
 
     pub fn get(&mut self, index: i32) -> Option<&T> {
@@ -189,44 +205,58 @@ impl<T> DoublyLinkedList<T> {
         self.left.get_top()
     }
 
-
 }
 
+pub fn print_dll(dl: &mut DoublyLinkedList<i32>) {
+    let sz = *dl.get_size().unwrap();
+    for x in 0..sz {
+        print!("{} ", dl.get(x).unwrap());
+    }
+}
 
 fn main() {
-    let mut list:List<i32> = List::new();
-    list.push(1);
-    list.push(2);
-    list.push(3);
-
-    let mut it = list.iter_mut();
-
-    let mut elem = it.next();
-    elem.take().map(|node| {
-        *node += 2;
-        elem = Some(node);
-    });
-    it = list.iter_mut();
-    elem = it.next();
-    // print!("{} ", elem.unwrap());
-    while (elem != None) {
-        elem.map(|value| {
-            println!("{}", value);
-        });
-        elem = it.next();
-    }
-
-    // let mut dl: DoublyLinkedList<i32> = DoublyLinkedList::new();
-    // dl.push_back(1);
-    // dl.push_back(2);
-    // dl.push_back(3);
-    // dl.shift(0);
-    // dl.get_size().map(|size| {
-    //     for index in 0..*size {
-    //         dl.left.get_top().map( |node| { println!("{}", node) });
-    //         dl.shift(index);
-    //     }
+    // let mut list:List<i32> = List::new();
+    // list.push(1);
+    // list.push(2);
+    // list.push(3);
+    //
+    // let mut it = list.iter_mut();
+    //
+    // let mut elem = it.next();
+    // elem.take().map(|node| {
+    //     *node += 2;
+    //     elem = Some(node);
     // });
+    // it = list.iter_mut();
+    // elem = it.next();
+    // // print!("{} ", elem.unwrap());
+    // while (elem != None) {
+    //     elem.map(|value| {
+    //         println!("{}", value);
+    //     });
+    //     elem = it.next();
+    // }
+
+    let mut dl: DoublyLinkedList<i32> = DoublyLinkedList::new();
+    dl.push_back(1);
+    dl.push_back(2);
+    dl.push_back(3);
+    dl.push_back(4);
+    dl.push_back(5);
+    dl.push_back(6);
+
+    dl.previous();
+    dl.previous();
+    dl.previous();
+    dl.next();
+    print!("{} ", dl.get_current().unwrap());
+
+
+
+
+    // match dl.get_size() {
+    //     Some()
+    // }
 
 
 
