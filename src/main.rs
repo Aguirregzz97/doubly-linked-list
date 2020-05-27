@@ -3,6 +3,7 @@ use std::cmp;
 use std::fmt::Debug;
 use std::ops::Deref;
 
+// Structures
 #[derive(Debug)]
 pub struct List<T> {
     head: Option<Box<Node<T>>>,
@@ -15,6 +16,18 @@ pub struct Node<T> {
     next: Option<Box<Node<T>>>,
 }
 
+// Iterator Structures
+pub struct IntoIter<T> (List<T>);
+
+pub struct Iter<'a,T> {
+    next: Option<&'a Node<T>>,
+}
+
+pub struct IterMut<'a, T> {
+    next: Option<&'a mut Node<T>>,
+}
+
+// Implementations
 impl<T> List<T> {
     pub fn new() -> Self {
         List {
@@ -55,8 +68,63 @@ impl<T> List<T> {
             None => None
         }
     }
+
+    // Iterator Methods
+    pub fn into_iter(self) -> IntoIter<T> {
+        IntoIter (self)
+    }
+
+    pub fn iter(&self) -> Iter<T> {
+        Iter {
+            next: self.head.as_ref().map(|node| { &**node }),
+        }
+    }
+
+    pub fn iter_mut(&mut self) -> IterMut<T> {
+        IterMut {
+            next: self.head.as_mut().map(|node| { &mut **node }),
+        }
+    }
 }
 
+// Traits
+trait Iterator {
+    type Item;
+    fn next(&mut self) -> Option<Self::Item>;
+}
+
+// Traits Implementation
+impl<T> Iterator for IntoIter<T> {
+    type Item = T;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.0.pop()
+    }
+}
+
+impl<'a, T> Iterator for Iter<'a, T> {
+    type Item = &'a T;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.next.map(|node| {
+            self.next = node.next.as_ref().map(|next_node| { &** next_node });
+            &node.elem
+        })
+    }
+}
+
+impl<'a, T> Iterator for IterMut<'a, T> {
+    type Item = &'a mut T;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.next.take().map(|node| {
+            self.next = node.next.as_mut().map(|next_node| { &mut ** next_node });
+            &mut node.elem
+        })
+    }
+}
+
+// Doubly Linked List
 #[derive(Debug)]
 pub struct DoublyLinkedList<T> {
     left: List<T>,
@@ -126,47 +194,41 @@ impl<T> DoublyLinkedList<T> {
 
 
 fn main() {
-    // let mut list:List<i32> = List::new();
-    // list.push(1);
-    // list.push(2);
-    // list.push(3);
-    // // let mut head = list.pop();
-    //
-    // let mut head = list.pop();
-    // let mut x = list.get_top();
-    // match x {
-    //     Some(value) => println!("{}", value),
-    //     None => {}
-    // }
+    let mut list:List<i32> = List::new();
+    list.push(1);
+    list.push(2);
+    list.push(3);
 
-    let mut dl: DoublyLinkedList<i32> = DoublyLinkedList::new();
-    dl.push_back(1);
-    dl.push_back(2);
-    dl.push_back(3);
-    dl.shift(0);
-    dl.get_size().map(|size| {
-        for index in 0..*size {
-            dl.left.get_top().map( |node| { println!("{}", node) });
-            dl.shift(index);
-        }
+    let mut it = list.iter_mut();
+
+    let mut elem = it.next();
+    elem.take().map(|node| {
+        *node += 2;
+        elem = Some(node);
     });
-    // dl.left.get_top().map( |node| { println!("{}", node) });
-    // dl.shift(1);
-    // dl.left.get_top().map( |node| { println!("{}", node) });
+    it = list.iter_mut();
+    elem = it.next();
+    // print!("{} ", elem.unwrap());
+    while (elem != None) {
+        elem.map(|value| {
+            println!("{}", value);
+        });
+        elem = it.next();
+    }
 
-    // }
+    // let mut dl: DoublyLinkedList<i32> = DoublyLinkedList::new();
+    // dl.push_back(1);
+    // dl.push_back(2);
+    // dl.push_back(3);
     // dl.shift(0);
-    // dl.left.get_top().map( |node| { println!("{}", node) });
-    // dl.shift(1);
-    // dl.left.get_top().map( |node| { println!("{}", node) });
-    // dl.shift(1);
-    // dl.left.get_top().map( |node| { println!("{}", node) });
+    // dl.get_size().map(|size| {
+    //     for index in 0..*size {
+    //         dl.left.get_top().map( |node| { println!("{}", node) });
+    //         dl.shift(index);
+    //     }
+    // });
 
-    // dl.left.get_top().map( |node| { println!("{}", node) });
-    // match x {
-    //     Some(value) => println!("{}", value),
-    //     None => {}
-    // }
+
 
 }
 
